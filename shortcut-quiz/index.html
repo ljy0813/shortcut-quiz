@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>바로 가기 키 암기 게임</title><style>
+:root{font-family:system-ui,-apple-system,'Malgun Gothic',sans-serif;color:#1f2937;background:#f5f7fb}*{box-sizing:border-box}body{margin:0;padding:32px 16px}.app{max-width:690px;margin:auto;background:white;border:1px solid #e5e7eb;border-radius:22px;padding:28px;box-shadow:0 12px 42px #14203312}h1{font-size:25px;margin:0 0 8px}p{color:#64748b;margin:0 0 25px}.meta{display:flex;justify-content:space-between;align-items:center;color:#64748b;font-size:14px}.track{height:8px;background:#e5e7eb;border-radius:99px;margin:15px 0 10px;overflow:hidden}.fill{height:100%;background:#2563eb;width:0;transition:width .2s}.stat{display:flex;justify-content:space-between;font-size:13px;color:#64748b}.question{padding:38px 6px 28px;text-align:center}.hint{font-size:13px;color:#64748b;font-weight:600}.question h2{font-size:23px;line-height:1.5;word-break:keep-all;margin:14px 0 0}.choices{display:grid;gap:10px}.choice{width:100%;text-align:left;border:1px solid #d9e0eb;background:white;border-radius:13px;min-height:62px;padding:12px 18px;font-size:16px;color:#111827;cursor:pointer;display:flex;align-items:center;gap:16px}.choice:hover:not(:disabled){border-color:#2563eb;background:#eff6ff}.choice:disabled{cursor:default}.number{font-size:13px;font-weight:700;color:#64748b;background:#f1f5f9;border-radius:8px;min-width:34px;height:34px;display:grid;place-items:center}.choice.good{border:2px solid #15803d;background:#f0fdf4}.choice.bad{border:2px solid #dc2626;background:#fef2f2}.feedback{font-weight:700;margin:20px 0 10px}.goodtext{color:#15803d}.badtext{color:#dc2626}.btn{border:0;border-radius:11px;background:#2563eb;color:white;font-size:16px;font-weight:650;padding:14px 18px;cursor:pointer;width:100%;margin-top:12px}.btn.alt{background:#e9eff9;color:#1e3a8a}.result{text-align:center;padding:30px 5px}.result h2{font-size:28px}.score{font-size:50px;font-weight:800;margin:16px}.hidden{display:none}@media(max-width:500px){body{padding:12px}.app{padding:20px 16px;border-radius:15px}.question h2{font-size:20px}}
+</style></head><body><main class="app"><h1>바로 가기 키 암기 게임</h1><p>기능 설명을 읽고 알맞은 바로 가기 키를 골라 보세요.</p><section id="game"><div class="meta"><span id="mode">전체 문제</span><span id="progress"></span></div><div class="track"><div class="fill" id="fill"></div></div><div class="stat"><span id="correct"></span><span id="wrong"></span></div><div class="question"><div class="hint">다음 기능을 실행하는 바로 가기 키는?</div><h2 id="question"></h2></div><div class="choices" id="choices"></div><div id="feedback" class="feedback" aria-live="polite"></div><button id="next" class="btn hidden" type="button">다음 문제 →</button></section><section id="result" class="result hidden"><h2>퀴즈 완료!</h2><div class="score" id="score"></div><p id="summary"></p><button id="retry-wrong" class="btn">틀린 문제만 다시 풀기</button><button id="retry-all" class="btn alt">전체 41문제 다시 풀기</button></section></main><script>
+const bank=[
+["폴더 및 파일의 이름을 변경한다.","F2"],
+["파일 탐색기에서 검색 상자를 선택한다.","F3"],
+["파일 탐색기에서 주소 표시줄 목록을 표시한다.","F4"],
+["최신 정보로 고침한다.","F5"],
+["창이나 바탕 화면의 요소를 순서대로 전환한다.","F6"],
+["현재 실행 중인 앱의 메뉴 모음을 활성화한다.","F10"],
+["현재 실행 중인 화면에서 이전 또는 다음 화면으로 이동한다.","Alt + ← / →"],
+["현재 실행 중인 앱을 순서대로 전환한다.","Alt + Esc"],
+["실행 중인 앱 목록을 화면 중앙에 표시하고 작업 창을 선택한다.","Alt + Tab"],
+["선택된 항목의 속성 대화상자를 실행한다.","Alt + Enter"],
+["활성 창의 바로 가기 메뉴를 표시한다.","Alt + Spacebar"],
+["실행 중인 창 또는 앱을 종료한다.","Alt + F4"],
+["현재 활성 창을 클립보드로 복사한다.","Alt + Print Screen"],
+["로그인 화면에서 입력한 암호를 확인할 수 있다.","Alt + F8"],
+["폴더 및 파일을 모두 선택한다.","Ctrl + A"],
+["시작 메뉴를 표시한다.","Ctrl + Esc"],
+["작업 관리자 대화상자를 실행한다.","Ctrl + Shift + Esc"],
+["바탕 화면의 아이콘 크기를 변경한다.","Ctrl + 마우스 스크롤"],
+["휴지통을 거치지 않고 바로 삭제한다.","Shift + Delete"],
+["바로 가기 메뉴를 표시한다.","Shift + F10"],
+["시작 메뉴를 표시하는 단독 키는?","Windows 키"],
+["열려 있는 모든 창을 최소화하여 바탕 화면을 표시한다.","Win + D"],
+["파일 탐색기를 실행한다.","Win + E"],
+["피드백 허브 앱을 실행한다.","Win + F"],
+["컴퓨터를 잠그거나 사용자를 전환한다.","Win + L"],
+["열려 있는 모든 창을 최소화하거나 이전 크기로 나타낸다.","Win + M / Win + Shift + M"],
+["실행 창을 나타낸다.","Win + R"],
+["설정의 접근성 창을 나타낸다.","Win + U"],
+["작업 표시줄의 앱을 차례로 선택한다.","Win + T"],
+["알림 센터를 표시한다.","Win + A"],
+["알림 영역으로 포커스를 옮긴다.","Win + B"],
+["알림 영역의 날짜와 시간을 표시하거나 숨긴다.","Win + Alt + D"],
+["설정 창을 화면에 나타낸다.","Win + I"],
+["검색 상자로 포커스를 옮긴다.","Win + S"],
+["가상 데스크톱을 추가한다.","Win + Ctrl + D"],
+["사용 중인 가상 데스크톱을 삭제한다.","Win + Ctrl + F4"],
+["선택된 창을 제외한 모든 창을 최소화하거나 복원한다.","Win + Home"],
+["선택된 창을 최대화하거나 최소화하고 화면 좌우에 배치한다.","Win + 방향키"],
+["컴퓨터 찾기 대화상자를 나타낸다.","Win + Ctrl + F"],
+["작업 보기를 실행한다.","Win + Tab"],
+["시스템 정보 창을 나타낸다.","Win + Pause/Break"]
+];
+let order=[],position=0,correct=0,wrongs=[],answered=false;
+const el=id=>document.getElementById(id);
+function start(indices,label){order=indices.slice();position=0;correct=0;wrongs=[];answered=false;el('mode').textContent=label;el('game').classList.remove('hidden');el('result').classList.add('hidden');render()}
+function render(){answered=false;const index=order[position],item=bank[index];el('progress').textContent=`문제 ${position+1} / ${order.length}`;el('fill').style.width=`${100*position/order.length}%`;el('correct').textContent=`정답 ${correct}개`;el('wrong').textContent=`오답 ${wrongs.length}개`;el('question').textContent=item[0];el('feedback').textContent='';el('next').classList.add('hidden');el('next').textContent=position===order.length-1?'결과 확인하기':'다음 문제 →';const others=bank.map((v,i)=>({answer:v[1],i})).filter(o=>o.i!==index&&o.answer!==item[1]&&!(item[1]==='Windows 키'&&o.answer==='Ctrl + Esc'));let distractors=[];for(let j=0;distractors.length<3;j++){let candidate=others[(index*13+7+j*9)%others.length].answer;if(!distractors.includes(candidate))distractors.push(candidate)}let choices=[item[1],...distractors];const shift=index%4;choices=[...choices.slice(shift),...choices.slice(0,shift)];el('choices').replaceChildren();choices.forEach((option,j)=>{let btn=document.createElement('button');btn.type='button';btn.className='choice';let num=document.createElement('span');num.className='number';num.textContent=j+1;let txt=document.createElement('span');txt.textContent=option;btn.append(num,txt);btn.addEventListener('click',()=>choose(option,btn));el('choices').append(btn)})}
+function choose(option,btn){if(answered)return;answered=true;const index=order[position],answer=bank[index][1];if(option===answer){correct++;el('feedback').textContent='정답!';el('feedback').className='feedback goodtext'}else{wrongs.push(index);el('feedback').textContent=`오답! 정답은 ${answer}`;el('feedback').className='feedback badtext'}for(const button of el('choices').children){button.disabled=true;if(button.lastChild.textContent===answer)button.classList.add('good');else if(button===btn)button.classList.add('bad')}el('correct').textContent=`정답 ${correct}개`;el('wrong').textContent=`오답 ${wrongs.length}개`;el('fill').style.width=`${100*(position+1)/order.length}%`;el('next').classList.remove('hidden')}
+el('next').addEventListener('click',()=>{if(position+1<order.length){position++;render()}else{el('game').classList.add('hidden');el('result').classList.remove('hidden');el('score').textContent=`${correct} / ${order.length}점`;el('summary').textContent=`정답률 ${Math.round(100*correct/order.length)}%, 틀린 문제 ${wrongs.length}개`;el('retry-wrong').classList.toggle('hidden',wrongs.length===0)}});
+el('retry-all').addEventListener('click',()=>start(bank.map((_,i)=>i),'전체 문제'));
+el('retry-wrong').addEventListener('click',()=>start([...new Set(wrongs)],'오답 복습'));
+start(bank.map((_,i)=>i),'전체 문제');
+</script></body></html>
